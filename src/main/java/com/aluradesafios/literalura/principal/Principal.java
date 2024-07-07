@@ -1,5 +1,6 @@
 package com.aluradesafios.literalura.principal;
 
+import com.aluradesafios.literalura.model.Autor;
 import com.aluradesafios.literalura.model.Datos;
 import com.aluradesafios.literalura.model.DatosLibros;
 import com.aluradesafios.literalura.model.Libro;
@@ -40,7 +41,6 @@ public class Principal {
                     3 - Mostrar Autores registrados
                     4 - Mostrar autores vivos en determinado año
                     5 - Mostrar libros por idioma
-                    6 - Buscar autor por nombre
                     0 - Salir
                     """;
             System.out.println(menu);
@@ -59,18 +59,44 @@ public class Principal {
                         getLibros();
                     break;
                 case 3:
-                    //buscarLibroPorNombre();
+                        getAutores();
                     break;
                 case 4:
-                    // mostrarLibroConMasDescargas();
+                        getAutoresEnDeterminadosAnios();
                     break;
                 case 5:
-                    //mostrarLibrosPorIdioma();
+                        getLibrosPorIdioma();
                     break;
             }
         }
     }
 
+    private void getLibrosPorIdioma() {
+        System.out.println("Por favor escribe el idioma que desees buscar:");
+        var idioma = teclado.nextLine();
+        List<Libro> libros = libroRepository.findByIdioma(idioma);
+        if (libros.isEmpty()) {
+            System.out.println("No se pudo encontrar un libro en el idioma: " + idioma);
+        } else {
+            for (Libro libro : libros) {
+                System.out.println(libro.toString());
+            }
+        }
+    }
+
+    private void getAutoresEnDeterminadosAnios() {
+        System.out.println("Por favor escribe el año que desees buscar:");
+        var anio = teclado.nextInt();
+        teclado.nextLine();
+        List<Autor> autors = autorRepository.findByFechaNacimientoLessThanEqualAndFechaDefuncionGreaterThanEqual(anio, anio);
+        if (autors.isEmpty()) {
+            System.out.println("No se pudo encontrar a un autor que haya nacido entre el año:  " + anio);
+        } else {
+            for (Autor autor : autors) {
+                System.out.println(autor.toString());
+            }
+        }
+    }
 
 
     private void busquedaLibros() {
@@ -112,6 +138,28 @@ public class Principal {
             }
         }catch (Exception e){
             System.out.println("Error al mostrar los libros");
+        }
+    }
+
+    private void getAutores() {
+        List<Libro> libros = libroRepository.findAll();
+        List<String> autores = libros.stream()
+                .map(libro -> libro.getAutor().getNombre())
+                .distinct()
+                .collect(Collectors.toList());
+        try{
+            if(autores.isEmpty()){
+                System.out.println("No hay autores registrados");
+            }else{
+                for(String autor : autores){
+                    System.out.println("\n3Autor: " + autor + "\n" + "Libros: " + libros.stream()
+                            .filter(libro -> libro.getAutor().getNombre().equals(autor))
+                            .map(Libro::getTitulo)
+                            .collect(Collectors.toList()));
+                }
+            }
+        }catch (Exception e){
+            System.out.println("Error al mostrar los autores");
         }
     }
 }
